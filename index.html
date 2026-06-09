@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LaunchDarkly × Bhanu Kumar · Proof of Work</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+
+:root{
+  --bg:     #06080b;
+  --bg2:    #0b0e14;
+  --bg3:    #10151e;
+  --bg4:    #161c28;
+  --bg5:    #1c2334;
+  --bdr:    rgba(255,255,255,0.055);
+  --bmd:    rgba(255,255,255,0.10);
+  --blg:    rgba(255,255,255,0.18);
+  --t1:     #eceef2;
+  --t2:     #8b93a5;
+  --t3:     #404860;
+
+  --ld:     #6366f1;
+  --ld-dim: rgba(99,102,241,0.12);
+  --ld-glo: rgba(99,102,241,0.22);
+  --ld-t:   #a5b4fc;
+
+  --amb:    #f59e0b;
+  --adim:   rgba(245,158,11,0.10);
+  --at:     #fcd34d;
+
+  --grn:    #34d399;
+  --gdim:   rgba(52,211,153,0.09);
+  --gt:     #6ee7b7;
+
+  --red:    #f87171;
+  --rdim:   rgba(248,113,113,0.09);
+
+  --blu:    #60a5fa;
+  --bldim:  rgba(96,165,250,0.09);
+}
+
+html{scroll-behavior:smooth;scroll-padding-top:62px;}
+
+body{
+  background:var(--bg);
+  color:var(--t1);
+  font-family:'Space Grotesk',system-ui,sans-serif;
+  font-size:16px;
+  line-height:1.72;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* noise layer */
+body::before{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.88' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.024'/%3E%3C/svg%3E");
+}
+
+/* subtle grid */
+body::after{
+  content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(var(--ld-dim) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ld-dim) 1px, transparent 1px);
+  background-size:56px 56px;
+  opacity:0.4;
+}
+
+/* reading bar */
+#rbar{position:fixed;top:0;left:0;height:2px;background:var(--ld);z-index:999;width:0;transition:width .08s linear;}
+
+/* ====== NAV ====== */
+.nav{
+  position:sticky;top:0;z-index:400;
+  background:rgba(6,8,11,0.94);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--bdr);
+  padding:0 5vw;
+}
+.nav-i{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  height:60px;gap:16px;
+}
+.nav-brand{
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+  font-family:'Fira Code',monospace;font-size:11.5px;
+  color:var(--t2);letter-spacing:0.04em;
+}
+.flag-dot{
+  width:8px;height:14px;border-radius:1px;
+  background:var(--ld);
+  box-shadow:0 0 8px var(--ld-glo);
+  animation:flagwave 2.8s ease-in-out infinite;
+}
+@keyframes flagwave{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.nav-brand span{color:var(--ld-t);}
+
+.nav-links{display:flex;gap:2px;}
+.nl{
+  font-size:12px;font-weight:500;letter-spacing:0.02em;
+  padding:5px 13px;border-radius:6px;
+  border:1px solid transparent;
+  color:var(--t2);background:transparent;
+  text-decoration:none;transition:all 0.13s;white-space:nowrap;
+  font-family:'Fira Code',monospace;
+}
+.nl:hover{border-color:var(--bdr);color:var(--t1);}
+.nl.cta{background:var(--ld);border-color:var(--ld);color:#fff;font-weight:600;}
+.nl.cta:hover{opacity:0.87;}
+
+.hbg{display:none;flex-direction:column;gap:5px;cursor:pointer;background:none;border:none;padding:4px;flex-shrink:0;}
+.hbg span{display:block;width:20px;height:1.5px;background:var(--t1);border-radius:2px;transition:transform .3s,opacity .3s;}
+.hbg.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);}
+.hbg.open span:nth-child(2){opacity:0;}
+.hbg.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);}
+.mob-menu{display:none;position:fixed;inset:0;top:60px;background:var(--bg);z-index:390;flex-direction:column;padding:28px 5vw;border-top:1px solid var(--bdr);}
+.mob-menu.open{display:flex;}
+.mob-menu a{display:block;font-size:18px;font-family:'Space Grotesk',sans-serif;font-weight:600;color:var(--t1);text-decoration:none;padding:14px 0;border-bottom:1px solid var(--bdr);}
+.mob-menu a.cta-m{color:var(--ld-t);border-bottom:none;margin-top:8px;}
+@media(max-width:740px){.nav-links{display:none;}.hbg{display:flex;}}
+
+/* ====== LAYOUT ====== */
+.wrap{max-width:1200px;margin:0 auto;padding:0 5vw;position:relative;z-index:1;}
+section{padding:80px 0;border-bottom:1px solid var(--bdr);}
+section:last-of-type{border-bottom:none;}
+
+/* ====== SECTION LABELS ====== */
+.sec-eye{
+  font-family:'Fira Code',monospace;font-size:11px;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--ld-t);display:block;margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.sec-eye::before{content:'';display:block;width:20px;height:1px;background:var(--ld);}
+
+.sec-h{
+  font-size:clamp(22px,3.2vw,36px);font-weight:600;
+  color:var(--t1);line-height:1.25;margin-bottom:14px;
+}
+.sec-sub{font-size:15px;color:var(--t2);line-height:1.75;max-width:620px;}
+
+/* ====== HERO ====== */
+.hero{
+  min-height:88vh;display:flex;align-items:center;
+  padding:100px 0 80px;position:relative;overflow:hidden;
+}
+
+/* big glow blob */
+.hero::before{
+  content:'';position:absolute;
+  width:600px;height:600px;
+  top:-160px;right:-120px;
+  background:radial-gradient(circle, var(--ld-glo) 0%, transparent 70%);
+  pointer-events:none;z-index:0;
+}
+
+.hero-content{position:relative;z-index:1;max-width:760px;}
+
+.hero-tag{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Fira Code',monospace;font-size:11px;
+  letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--ld-t);background:var(--ld-dim);
+  border:1px solid rgba(99,102,241,0.22);
+  padding:6px 14px;border-radius:100px;
+  margin-bottom:32px;
+}
+.hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--ld);animation:flagwave 2s ease-in-out infinite;}
+
+.hero-h{
+  font-size:clamp(38px,6vw,76px);font-weight:700;
+  line-height:1.04;letter-spacing:-0.02em;
+  color:var(--t1);margin-bottom:28px;
+}
+.hero-h em{
+  font-style:normal;
+  background:linear-gradient(135deg, var(--ld-t) 0%, var(--ld) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+
+.hero-sub{
+  font-size:clamp(16px,1.8vw,19px);color:var(--t2);
+  line-height:1.7;max-width:580px;margin-bottom:44px;
+  font-weight:400;
+}
+
+/* flag toggle: the signature element */
+.flag-demo{
+  display:inline-flex;align-items:center;gap:14px;
+  background:var(--bg3);border:1px solid var(--bmd);
+  border-radius:10px;padding:14px 20px;
+  margin-bottom:44px;cursor:default;
+}
+.flag-key{
+  font-family:'Fira Code',monospace;font-size:12px;
+  color:var(--t3);letter-spacing:0.04em;
+}
+.flag-key span{color:var(--ld-t);}
+.flag-toggle{
+  width:44px;height:24px;border-radius:12px;
+  background:var(--ld);position:relative;
+  transition:background 0.25s;cursor:pointer;
+  flex-shrink:0;
+  box-shadow:0 0 12px var(--ld-glo);
+}
+.flag-toggle.off{background:var(--bg5);box-shadow:none;}
+.flag-toggle::after{
+  content:'';position:absolute;
+  width:18px;height:18px;border-radius:50%;
+  background:#fff;top:3px;left:3px;
+  transition:transform 0.25s;
+}
+.flag-toggle.off::after{transform:none;}
+.flag-toggle:not(.off)::after{transform:translateX(20px);}
+.flag-val{
+  font-family:'Fira Code',monospace;font-size:12px;
+  color:var(--t2);min-width:34px;
+}
+.flag-val.on{color:var(--grn);}
+
+.hero-btns{display:flex;gap:10px;flex-wrap:wrap;}
+.hbtn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:600;letter-spacing:0.01em;
+  padding:11px 24px;border-radius:8px;
+  text-decoration:none;transition:all 0.14s;
+  font-family:'Space Grotesk',sans-serif;
+}
+.hbtn.pri{background:var(--ld);color:#fff;}
+.hbtn.pri:hover{opacity:0.87;}
+.hbtn.ghost{background:transparent;border:1px solid var(--bmd);color:var(--t2);}
+.hbtn.ghost:hover{border-color:var(--blg);color:var(--t1);}
+
+/* ====== CARDS / GRID ====== */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+@media(max-width:860px){.grid-2{grid-template-columns:1fr;}.grid-3{grid-template-columns:1fr 1fr;}.grid-4{grid-template-columns:1fr 1fr;}}
+@media(max-width:540px){.grid-3{grid-template-columns:1fr;}.grid-4{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:24px;
+}
+.card-tag{
+  font-family:'Fira Code',monospace;font-size:10px;
+  letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:12px;display:block;
+}
+.card-h{font-size:16px;font-weight:600;color:var(--t1);margin-bottom:10px;line-height:1.35;}
+.card-p{font-size:13.5px;color:var(--t2);line-height:1.70;}
+
+/* pill badges */
+.pill{
+  display:inline-block;
+  font-family:'Fira Code',monospace;font-size:10.5px;
+  letter-spacing:0.06em;
+  padding:3px 10px;border-radius:100px;
+  border:1px solid;margin-right:6px;margin-top:8px;
+}
+.pill-ld{background:var(--ld-dim);border-color:rgba(99,102,241,0.25);color:var(--ld-t);}
+.pill-grn{background:var(--gdim);border-color:rgba(52,211,153,0.25);color:var(--gt);}
+.pill-amb{background:var(--adim);border-color:rgba(245,158,11,0.25);color:var(--at);}
+.pill-red{background:var(--rdim);border-color:rgba(248,113,113,0.25);color:var(--red);}
+.pill-blu{background:var(--bldim);border-color:rgba(96,165,250,0.25);color:var(--blu);}
+.pill-mute{background:rgba(255,255,255,0.04);border-color:var(--bdr);color:var(--t3);}
+
+/* ====== POSITIONING SECTION ====== */
+.pos-split{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:36px;}
+@media(max-width:760px){.pos-split{grid-template-columns:1fr;}}
+
+.pos-panel{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:26px;
+}
+.pos-panel-label{
+  font-family:'Fira Code',monospace;font-size:10px;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:16px;display:block;
+}
+.pos-panel-label.now{color:var(--red);}
+.pos-panel-label.opp{color:var(--grn);}
+.pos-panel h4{font-size:15px;font-weight:600;color:var(--t1);margin-bottom:12px;line-height:1.3;}
+.pos-panel p{font-size:13.5px;color:var(--t2);line-height:1.72;}
+.pos-panel ul{list-style:none;margin-top:14px;}
+.pos-panel ul li{
+  font-size:13px;color:var(--t2);
+  padding:8px 0;border-bottom:1px solid var(--bdr);
+  display:flex;align-items:flex-start;gap:10px;
+  line-height:1.5;
+}
+.pos-panel ul li:last-child{border-bottom:none;}
+.pos-panel ul li::before{
+  content:'';flex-shrink:0;
+  width:5px;height:5px;border-radius:50%;
+  background:var(--ld);margin-top:6px;
+}
+.pos-panel ul li.warn::before{background:var(--amb);}
+
+/* message table */
+.msg-table{
+  width:100%;border-collapse:collapse;
+  margin-top:32px;font-size:14px;
+}
+.msg-table th{
+  font-family:'Fira Code',monospace;font-size:10px;
+  letter-spacing:0.10em;text-transform:uppercase;
+  color:var(--t3);font-weight:400;
+  padding:8px 16px;text-align:left;
+  border-bottom:1px solid var(--bdr);
+}
+.msg-table td{
+  padding:14px 16px;
+  border-bottom:1px solid var(--bdr);
+  vertical-align:top;
+}
+.msg-table tr:last-child td{border-bottom:none;}
+.msg-table td:first-child{color:var(--t1);font-weight:500;font-size:13px;width:20%;}
+.msg-table td:nth-child(2){color:var(--t2);font-size:13px;width:30%;}
+.msg-table td:nth-child(3){color:var(--ld-t);font-size:13px;width:50%;}
+@media(max-width:680px){
+  .msg-table th:nth-child(2),.msg-table td:nth-child(2){display:none;}
+  .msg-table td:first-child{width:35%;}
+  .msg-table td:nth-child(3){width:65%;}
+}
+
+/* ====== LAUNCH PLAN ====== */
+.launch-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:32px;}
+@media(max-width:780px){.launch-grid{grid-template-columns:1fr;}}
+
+.lcard{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:22px;
+  display:flex;flex-direction:column;gap:0;
+}
+.lcard-phase{
+  font-family:'Fira Code',monospace;font-size:10px;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:6px;
+}
+.lcard-phase.p1{color:var(--ld-t);}
+.lcard-phase.p2{color:var(--amb);}
+.lcard-phase.p3{color:var(--grn);}
+.lcard-title{font-size:16px;font-weight:600;color:var(--t1);margin-bottom:14px;line-height:1.3;}
+.lcard-items{list-style:none;display:flex;flex-direction:column;gap:8px;}
+.lcard-items li{
+  font-size:13px;color:var(--t2);line-height:1.6;
+  padding:8px 10px;background:var(--bg3);border-radius:6px;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.lcard-items li::before{
+  content:'';flex-shrink:0;
+  width:4px;height:4px;border-radius:50%;
+  background:var(--t3);margin-top:7px;
+}
+
+/* ====== ACCORDION / SALES PLAYS ====== */
+.accord{
+  border:1px solid var(--bdr);border-radius:10px;
+  overflow:hidden;margin-top:32px;
+}
+.accord-item{border-bottom:1px solid var(--bdr);}
+.accord-item:last-child{border-bottom:none;}
+.accord-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 22px;cursor:pointer;
+  transition:background 0.13s;
+  gap:12px;
+}
+.accord-head:hover{background:var(--bg3);}
+.ah-left{display:flex;align-items:center;gap:14px;}
+.ah-tag{
+  font-family:'Fira Code',monospace;font-size:10px;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--t3);flex-shrink:0;
+}
+.ah-title{font-size:14px;font-weight:500;color:var(--t1);}
+.ah-chev{font-size:14px;color:var(--t3);transition:transform 0.22s;flex-shrink:0;}
+.accord-item.open .ah-chev{transform:rotate(180deg);}
+.accord-body{
+  display:none;padding:0 22px 22px 22px;
+  font-size:14px;color:var(--t2);line-height:1.72;
+}
+.accord-item.open .accord-body{display:block;}
+.accord-body strong{color:var(--t1);font-weight:500;}
+.accord-body p{margin-bottom:12px;}
+.accord-body p:last-child{margin-bottom:0;}
+
+/* objection callout */
+.obj-pair{
+  background:var(--bg3);border-radius:8px;
+  padding:16px 18px;margin-bottom:10px;
+  border-left:2px solid var(--ld);
+}
+.obj-q{font-size:13px;font-weight:500;color:var(--t1);margin-bottom:8px;}
+.obj-a{font-size:13px;color:var(--t2);line-height:1.68;}
+.obj-a strong{color:var(--ld-t);}
+
+/* ====== COMPETITIVE ====== */
+.comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:32px;}
+@media(max-width:680px){.comp-grid{grid-template-columns:1fr;}}
+
+.comp-card{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:22px;
+}
+.comp-name{
+  font-size:14px;font-weight:600;color:var(--t1);
+  margin-bottom:4px;
+}
+.comp-cat{
+  font-family:'Fira Code',monospace;font-size:10px;
+  color:var(--t3);letter-spacing:0.06em;
+  text-transform:uppercase;margin-bottom:16px;display:block;
+}
+.comp-rows{display:flex;flex-direction:column;gap:6px;}
+.comp-row{
+  font-size:12.5px;line-height:1.55;
+  padding:8px 10px;border-radius:6px;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.comp-row.win{background:var(--gdim);color:var(--gt);}
+.comp-row.lose{background:var(--rdim);color:var(--red);}
+.comp-row.win::before,.comp-row.lose::before{
+  flex-shrink:0;margin-top:1px;
+  font-size:11px;font-family:'Fira Code',monospace;
+}
+.comp-row.win::before{content:'+';}
+.comp-row.lose::before{content:'~';}
+
+/* ====== FUNNEL / JOURNEY ====== */
+.funnel-wrap{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:28px;margin-top:32px;
+}
+.f-label{
+  font-family:'Fira Code',monospace;font-size:10px;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:22px;display:block;
+}
+.f-row{margin-bottom:14px;}
+.f-row-top{
+  display:flex;justify-content:space-between;
+  font-size:13px;margin-bottom:6px;
+}
+.f-row-top .stage{color:var(--t1);font-weight:500;}
+.f-row-top .meta{
+  font-family:'Fira Code',monospace;font-size:11px;color:var(--t3);
+}
+.f-track{height:8px;background:var(--bg4);border-radius:4px;overflow:hidden;}
+.f-fill{height:100%;border-radius:4px;background:var(--ld);transition:width 1.2s cubic-bezier(0.16,1,0.3,1);}
+.f-fill.warm{background:var(--amb);}
+.f-fill.hot{background:var(--grn);}
+.f-note{
+  font-size:13px;color:var(--t2);line-height:1.7;
+  padding:14px 18px;background:var(--bg3);border-radius:8px;
+  margin-top:22px;border-left:2px solid var(--ld);
+}
+
+/* ====== WORK CARDS ====== */
+.work-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:32px;}
+@media(max-width:980px){.work-grid{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:600px){.work-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:380px){.work-grid{grid-template-columns:1fr;}}
+
+.wcard{
+  background:var(--bg2);border:1px solid var(--bdr);
+  border-radius:10px;padding:18px;
+  text-decoration:none;
+  display:flex;flex-direction:column;
+  transition:border-color 0.14s,transform 0.14s;
+}
+.wcard:hover{border-color:var(--bmd);transform:translateY(-2px);}
+.wcard-tag{
+  font-family:'Fira Code',monospace;font-size:10px;
+  letter-spacing:0.09em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:10px;display:block;
+}
+.wcard h4{font-size:14px;font-weight:600;color:var(--t1);margin-bottom:8px;line-height:1.35;}
+.wcard p{font-size:12.5px;color:var(--t2);line-height:1.62;flex:1;}
+.wcard-arr{margin-top:14px;font-family:'Fira Code',monospace;font-size:14px;color:var(--ld);}
+
+/* ====== FOOTER SIG ====== */
+.sig{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:64px 0;flex-wrap:wrap;gap:28px;
+}
+.sig-left{}
+.sig-name{
+  font-size:clamp(32px,5vw,56px);font-weight:700;
+  color:var(--t1);line-height:1;margin-bottom:14px;
+  letter-spacing:-0.02em;
+}
+.sig-name span{color:var(--ld);}
+.sig-meta{font-size:14px;color:var(--t2);line-height:2.0;}
+.sig-meta a{color:var(--t2);text-decoration:none;transition:color 0.13s;}
+.sig-meta a:hover{color:var(--t1);}
+.sig-btns{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-start;margin-top:24px;}
+.sbtn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13.5px;font-weight:600;
+  padding:10px 22px;border-radius:8px;
+  text-decoration:none;transition:all 0.13s;
+  font-family:'Space Grotesk',sans-serif;letter-spacing:0.01em;
+}
+.sbtn.pri{background:var(--ld);color:#fff;}
+.sbtn.pri:hover{opacity:0.87;}
+.sbtn.ghost{background:transparent;border:1px solid var(--bmd);color:var(--t2);}
+.sbtn.ghost:hover{border-color:var(--blg);color:var(--t1);}
+
+/* ====== STAT ROW ====== */
+.stat-row{
+  display:flex;gap:0;
+  border:1px solid var(--bdr);border-radius:10px;overflow:hidden;
+  margin-top:32px;
+}
+.stat-item{
+  flex:1;padding:22px 20px;border-right:1px solid var(--bdr);
+}
+.stat-item:last-child{border-right:none;}
+.stat-n{
+  font-size:clamp(24px,3vw,36px);font-weight:700;
+  color:var(--t1);line-height:1;margin-bottom:6px;letter-spacing:-0.01em;
+}
+.stat-n span{color:var(--ld);}
+.stat-l{font-size:12.5px;color:var(--t2);line-height:1.5;}
+@media(max-width:640px){.stat-row{flex-wrap:wrap;}.stat-item{flex-basis:50%;border-bottom:1px solid var(--bdr);}}
+
+/* insight callout */
+.insight{
+  background:var(--ld-dim);border:1px solid rgba(99,102,241,0.22);
+  border-radius:10px;padding:20px 22px;margin-top:16px;
+}
+.insight p{font-size:14px;color:var(--t1);line-height:1.72;}
+.insight p strong{color:var(--ld-t);}
+
+/* table wrapper scrollable */
+.table-wrap{overflow-x:auto;margin-top:32px;}
+
+/* ====== SCROLL REVEAL ====== */
+.reveal{opacity:0;transform:translateY(22px);transition:opacity 0.5s,transform 0.5s;}
+.reveal.visible{opacity:1;transform:none;}
+
+/* ====== CUSTOM SCROLLBAR ====== */
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.35);border-radius:2px;}
+</style>
+</head>
+
+<body>
+
+<div id="rbar"></div>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-i">
+    <div class="nav-brand">
+      <div class="flag-dot"></div>
+      <span>LD</span> / bhanu
+    </div>
+    <div class="nav-links">
+      <a href="#positioning" class="nl">Positioning</a>
+      <a href="#launches" class="nl">Launch Plays</a>
+      <a href="#sales" class="nl">Sales Enablement</a>
+      <a href="#competitive" class="nl">Competitive</a>
+      <a href="#gtm" class="nl">GTM Loop</a>
+      <a href="#work" class="nl">Other Work</a>
+      <a href="https://drive.google.com/file/d/1GaE7gZ0QKIMzGi6Z10KH2xRcwhoPgdYJ/view" target="_blank" class="nl cta">Resume</a>
+    </div>
+    <button class="hbg" id="hbg" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mob-menu" id="mob-menu">
+  <a href="#positioning" onclick="closeMob()">Positioning</a>
+  <a href="#launches" onclick="closeMob()">Launch Plays</a>
+  <a href="#sales" onclick="closeMob()">Sales Enablement</a>
+  <a href="#competitive" onclick="closeMob()">Competitive</a>
+  <a href="#gtm" onclick="closeMob()">GTM Loop</a>
+  <a href="#work" onclick="closeMob()">Other Work</a>
+  <a href="https://drive.google.com/file/d/1GaE7gZ0QKIMzGi6Z10KH2xRcwhoPgdYJ/view" target="_blank" class="cta-m" onclick="closeMob()">Resume</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span class="hero-tag-dot"></span>
+        Product Marketing · Feature Management · Developer GTM
+      </div>
+
+      <h1 class="hero-h">
+        Release with<br><em>precision.</em><br>Market with intent.
+      </h1>
+
+      <p class="hero-sub">
+        LaunchDarkly decoupled deployment from delivery. This page shows how PMM can close the loop between that engineering-level insight and the buyers who need to believe it.
+      </p>
+
+      <!-- interactive flag toggle signature -->
+      <div class="flag-demo" id="flagDemo">
+        <span class="flag-key"><span>new-checkout-flow</span></span>
+        <div class="flag-toggle" id="flagToggle"></div>
+        <span class="flag-val on" id="flagVal">true</span>
+      </div>
+
+      <div class="hero-btns">
+        <a href="#positioning" class="hbtn pri">See the work ↓</a>
+        <a href="https://www.linkedin.com/in/bhanuexcalibur/" target="_blank" class="hbtn ghost">LinkedIn</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- POSITIONING SECTION -->
+<section id="positioning">
+  <div class="wrap">
+    <span class="sec-eye">01 · Positioning</span>
+    <h2 class="sec-h">Where the story is, and where it could go</h2>
+    <p class="sec-sub">LaunchDarkly's current positioning leans hard on feature flags. That's accurate but incomplete. The real strategic ground is the release control plane for the AI era.</p>
+
+    <div class="stat-row reveal">
+      <div class="stat-item">
+        <div class="stat-n">35<span>+</span></div>
+        <div class="stat-l">SDK languages, making LD the default choice for polyglot engineering orgs</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n"><span>$</span>3B</div>
+        <div class="stat-l">Valuation at Series D (2021), built on a platform that started as a safety toggle</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n">4</div>
+        <div class="stat-l">Platform pillars: Release, Observe, Experiment, AI Configs. One platform, not four tools.</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-n">Galaxy<span>'25</span></div>
+        <div class="stat-l">Where Guarded Releases, AI Configs, and warehouse-native analytics reached GA</div>
+      </div>
+    </div>
+
+    <div class="pos-split reveal">
+      <div class="pos-panel">
+        <span class="pos-panel-label now">Current narrative gaps</span>
+        <h4>The flag story undersells the platform</h4>
+        <p>Most of LaunchDarkly's top-funnel content frames the product as "feature flags done well." That's how the company was born, but it's not where $3B of category value lives. The platform now does release orchestration, AI model config management, product analytics, and session replay. None of that maps to "flags."</p>
+        <ul>
+          <li class="warn">Buyers still associate LD with "just flags" despite the full release platform</li>
+          <li class="warn">AI Configs is a genuinely novel capability with no real competitive equivalent, but it's under-narrated</li>
+          <li class="warn">ICP content tends toward developers, leaving engineering managers and product leaders underserved</li>
+          <li class="warn">Galaxy recap blog does a lot of lifting, but the homepage positioning hasn't caught up</li>
+        </ul>
+      </div>
+      <div class="pos-panel">
+        <span class="pos-panel-label opp">Positioning opportunity</span>
+        <h4>The release control plane for software teams building with AI</h4>
+        <p>The new narrative isn't "feature flags at scale." It's: <em>when AI-generated code ships faster than humans can review it, LaunchDarkly is the control layer that keeps production safe.</em> That's a different conversation with a different buyer set, and it's defensible territory competitors can't credibly claim.</p>
+        <ul>
+          <li>Reframe: from "ship safely" to "build boldly, guard everything"</li>
+          <li>Elevate AI Configs as a category-creating moment, not a feature launch</li>
+          <li>Ladder up to CTO/VP Eng buyers who own release risk at org level</li>
+          <li>Use Guarded Releases as proof that the platform is watching the whole release, not just the toggle</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="insight reveal">
+      <p><strong>The positioning bet:</strong> LaunchDarkly is the only platform with a control plane that spans flags, release observability, AI config management, and experimentation. Competitors offer one or two of those. The PMM job is to make "one platform" feel like a relief, not a pitch.</p>
+    </div>
+  </div>
+</section>
+
+<!-- MESSAGING SECTION -->
+<section id="messaging">
+  <div class="wrap">
+    <span class="sec-eye">02 · Messaging by audience</span>
+    <h2 class="sec-h">Different buyers, different conversations</h2>
+    <p class="sec-sub">The same platform needs to land differently depending on who's in the room. Here's how I'd segment the message architecture.</p>
+
+    <div class="table-wrap reveal">
+      <table class="msg-table">
+        <thead>
+          <tr>
+            <th>Audience</th>
+            <th>Their actual fear</th>
+            <th>Message that lands</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Staff / Principal Engineer</td>
+            <td>Midnight outages, big-bang deploys, rollback that takes 45 minutes</td>
+            <td>Deploy on Friday. If it breaks, you fix it in under 60 seconds without a redeploy. No hero required.</td>
+          </tr>
+          <tr>
+            <td>VP Engineering</td>
+            <td>Velocity slows when teams get risk-averse after an incident</td>
+            <td>Guarded Releases pairs rollout velocity with automated regression detection. Teams ship more, not less.</td>
+          </tr>
+          <tr>
+            <td>Product Manager</td>
+            <td>Can't run clean experiments. Feature decisions made on gut, not data.</td>
+            <td>Every flag is an experiment waiting to happen. Warehouse-native analytics means the data lives where your data team already works.</td>
+          </tr>
+          <tr>
+            <td>CTO / Head of Platform</td>
+            <td>AI-generated code is multiplying release surface area faster than their tooling can handle</td>
+            <td>AI Configs gives you runtime control over prompts and model behavior without redeploying. The control plane that AI-native teams will need in 2025 is already shipping.</td>
+          </tr>
+          <tr>
+            <td>DevOps / Platform Eng</td>
+            <td>One-off tooling debt. Every team using a different rollout strategy.</td>
+            <td>Standardize release practices across engineering orgs. Relay Proxy for edge. FedRAMP for regulated environments. One pattern, everywhere.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- LAUNCH PLANS -->
+<section id="launches">
+  <div class="wrap">
+    <span class="sec-eye">03 · Launch execution</span>
+    <h2 class="sec-h">How I'd run a tier-1 launch: AI Configs</h2>
+    <p class="sec-sub">AI Configs reached GA at Galaxy 2025. It's the only runtime control plane for prompts, model configs, and AI behavior. Here's the launch blueprint I'd build.</p>
+
+    <div class="launch-grid reveal">
+      <div class="lcard">
+        <span class="lcard-phase p1">Phase 1 · Weeks 1-3</span>
+        <div class="lcard-title">Build the foundation</div>
+        <ul class="lcard-items">
+          <li>Nail the problem story first: why runtime AI control matters in a world where models hallucinate unpredictably in production</li>
+          <li>Coordinate with product on accurate feature scope: what AI Configs does and doesn't do, what's GA vs early access</li>
+          <li>Draft three message variants for engineers, PM leads, and platform buyers. Test internally with GTM stakeholders.</li>
+          <li>Produce one "explainer" asset that exists independently: not a blog, not a press release, not a webinar. something the sales team can actually send</li>
+          <li>Map internal readiness: does the sales team know how to demo AI Configs? If not, that's a week-2 fix, not a launch-day fix.</li>
+        </ul>
+      </div>
+      <div class="lcard">
+        <span class="lcard-phase p2">Phase 2 · Weeks 3-5</span>
+        <div class="lcard-title">Execute with distribution</div>
+        <ul class="lcard-items">
+          <li>Press + analyst briefings with a story angle: "control plane for the AI era," not "new feature for flags platform"</li>
+          <li>Partner with DevRel on a technical demo: show AI Config switching in a real LLM app, not a contrived example</li>
+          <li>Launch sequence: blog, social, Hacker News (technical angle only), developer Discord/Slack communities</li>
+          <li>Create customer proof point content with any beta users who can speak publicly, even one quote adds credibility</li>
+          <li>Run a campaign test: compare developer-targeted creative vs. platform-buyer-targeted creative across paid channels</li>
+        </ul>
+      </div>
+      <div class="lcard">
+        <span class="lcard-phase p3">Phase 3 · Weeks 5-8</span>
+        <div class="lcard-title">Learn and extend</div>
+        <ul class="lcard-items">
+          <li>Pull pipeline data: what content drove ICP engagement? Which channel sourced the best-fit leads for AI Configs specifically?</li>
+          <li>Interview 3-5 trial users of AI Configs. The patterns they describe are the next iteration of your messaging.</li>
+          <li>Write the post-launch teardown for internal GTM loop: what assumptions were right, what changed at contact with market</li>
+          <li>Feed learnings into SEO/GEO strategy: what does a developer search when they're trying to solve the problem AI Configs solves?</li>
+          <li>Build a competitive intelligence brief on how Harness, Statsig, and others respond to the AI Configs narrative</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="insight reveal" style="margin-top:24px;">
+      <p><strong>The rule I use for tier-1 launches:</strong> if the sales team can't explain the new capability without reading off the blog post, the launch didn't land internally. Internal readiness is launch success criterion, not a nice-to-have.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SALES ENABLEMENT -->
+<section id="sales">
+  <div class="wrap">
+    <span class="sec-eye">04 · Sales enablement</span>
+    <h2 class="sec-h">What reps actually need in the room</h2>
+    <p class="sec-sub">Sales enablement fails when PMM treats it as content distribution. Real enablement means reps can handle the conversation without the deck.</p>
+
+    <div class="accord reveal">
+      <div class="accord-item open">
+        <div class="accord-head" onclick="toggleAccord(this)">
+          <div class="ah-left">
+            <span class="ah-tag">Discovery talk track</span>
+            <span class="ah-title">Opening the release pain conversation</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="accord-body">
+          <p>The entry question isn't "are you using feature flags?" That gets a yes/no and dies. Instead:</p>
+          <div class="obj-pair">
+            <div class="obj-q">Ask: "What does a bad deployment look like for your team, and who finds out first?"</div>
+            <div class="obj-a">This surfaces the rollback pain, the on-call burden, and the customer impact window, all of which map directly to Guarded Releases. If the answer is "we don't have a clean rollback path," that's an AI Configs and observability conversation waiting to happen.</div>
+          </div>
+          <p>Follow-on: "How does your team decide what to release to 100% of users versus 10%?" Most teams either don't have a process or have a brittle one. That gap is LaunchDarkly's opening.</p>
+        </div>
+      </div>
+
+      <div class="accord-item">
+        <div class="accord-head" onclick="toggleAccord(this)">
+          <div class="ah-left">
+            <span class="ah-tag">Objection handling</span>
+            <span class="ah-title">"We already have feature flags in our CI/CD pipeline"</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="accord-body">
+          <div class="obj-pair">
+            <div class="obj-q">Prospect: "We built our own toggle system / we use AWS AppConfig / Unleash handles this for us."</div>
+            <div class="obj-a">
+              <strong>Don't argue with their solution. Instead:</strong> "That covers the toggling layer well. What does your team use when a release causes a regression? How do you know within the first 5 minutes that a flag change broke something?" The shift is from flag management to release observability. Most home-grown solutions stop at the toggle; Guarded Releases watches the whole release.
+            </div>
+          </div>
+          <p>For AWS AppConfig / Azure App Config: those are configuration services, not release platforms. The right frame is: "AppConfig stores the value, LaunchDarkly manages the release strategy, the rollout, the rollback logic, and the data from what happened." Apples to oranges.</p>
+        </div>
+      </div>
+
+      <div class="accord-item">
+        <div class="accord-head" onclick="toggleAccord(this)">
+          <div class="ah-left">
+            <span class="ah-tag">Champion play</span>
+            <span class="ah-title">Turning the engineering champion into an internal seller</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="accord-body">
+          <p>The LaunchDarkly buyer journey typically starts with an engineer who finds the product, loves it, and needs to sell it upward. PMM should arm that champion with three things:</p>
+          <div class="obj-pair">
+            <div class="obj-q">Champion asset: "The business case for release management"</div>
+            <div class="obj-a">Not a product brochure. A one-page frame that translates: release frequency to deploy risk, rollback speed to MTTR, flag adoption to engineering velocity. Numbers they can put in a Slack message to their VP.</div>
+          </div>
+          <p>The champion's biggest vulnerability is the "can't you just build it?" question from their leadership. The right response is: "We tried. Here's what maintaining a home-grown flag system actually costs over 24 months." That's a PMM-produced asset, and most companies don't have it.</p>
+        </div>
+      </div>
+
+      <div class="accord-item">
+        <div class="accord-head" onclick="toggleAccord(this)">
+          <div class="ah-left">
+            <span class="ah-tag">Late-stage play</span>
+            <span class="ah-title">Closing when deals stall on "too much platform"</span>
+          </div>
+          <span class="ah-chev">▾</span>
+        </div>
+        <div class="accord-body">
+          <p>A common late-stage stall: the technical champion loves LD, but the economic buyer sees it as over-engineered for their current use case. The deal stalls at "we only need basic flags right now."</p>
+          <div class="obj-pair">
+            <div class="obj-q">Reframe: start-small, grow-with-the-platform story</div>
+            <div class="obj-a"><strong>Structure this as an expansion path, not a platform pitch:</strong> start with Release flags on one team, add Guarded Releases when the first incident justifies it, layer in Experimentation once product is asking for feature impact data. Three purchase triggers, three different moments in the company's maturity. The first contract doesn't need to cover all three.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- COMPETITIVE SECTION -->
+<section id="competitive">
+  <div class="wrap">
+    <span class="sec-eye">05 · Competitive landscape</span>
+    <h2 class="sec-h">Where LaunchDarkly wins, where it needs to work</h2>
+    <p class="sec-sub">The competitive set is fragmented: open-source tools, cloud-native config services, experimentation platforms, and observability tools all touch adjacent territory. Here's the honest read.</p>
+
+    <div class="comp-grid reveal">
+      <div class="comp-card">
+        <div class="comp-name">Statsig</div>
+        <span class="comp-cat">Experimentation / Feature Flags</span>
+        <div class="comp-rows">
+          <div class="comp-row win">Strong experimentation layer and product analytics. But release orchestration, Guarded Releases, and the breadth of SDK coverage are materially thinner.</div>
+          <div class="comp-row win">LaunchDarkly's FedRAMP authorization and enterprise compliance story is a structural advantage Statsig hasn't built.</div>
+          <div class="comp-row lose">Statsig's pricing is more accessible for early-stage companies. LD can lose PLG deals at the bottom of the market to Statsig on cost alone.</div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-name">Harness</div>
+        <span class="comp-cat">DevOps Platform / Feature Flags Module</span>
+        <div class="comp-rows">
+          <div class="comp-row win">Harness Feature Flags is a module in a broader CI/CD platform. LaunchDarkly's depth on release management, observability, and AI Configs far exceeds what Harness offers as a module.</div>
+          <div class="comp-row win">When the conversation is specifically about feature management and release safety, LD wins on product focus. Harness wins when the buyer is consolidating their entire DevOps stack.</div>
+          <div class="comp-row lose">Harness can bundle feature flags into a CI/CD deal at a discount. Platform consolidation plays are difficult to counter with feature depth alone.</div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-name">Unleash / Flagsmith</div>
+        <span class="comp-cat">Open Source Feature Flags</span>
+        <div class="comp-rows">
+          <div class="comp-row win">Open-source tools cover basic flag management competently. But they have no release observability, no AI Configs, no warehouse-native experimentation, no enterprise governance layer.</div>
+          <div class="comp-row win">The "build vs. buy" objection is different here: this is "self-host vs. SaaS." The cost of maintaining Unleash at scale is the real number to surface.</div>
+          <div class="comp-row lose">For cost-sensitive engineering teams or startups with strong DevOps capability, open source is a real alternative. LD needs a sharp "total cost of ownership" narrative here.</div>
+        </div>
+      </div>
+
+      <div class="comp-card">
+        <div class="comp-name">AWS AppConfig / Azure App Config</div>
+        <span class="comp-cat">Cloud-Native Config Services</span>
+        <div class="comp-rows">
+          <div class="comp-row win">These are configuration stores, not release management platforms. No targeting, no rollback logic, no release observability, no experimentation. Different job to be done.</div>
+          <div class="comp-row win">The winning play: position LD as complementary to the CI/CD and cloud tools, not competing with them. "Your pipeline delivers the code. LaunchDarkly controls what runs."</div>
+          <div class="comp-row lose">Lock-in risk is real. Teams already embedded in AWS ecosystems will default to AppConfig for simple use cases. LD needs to win on complexity and scale.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GTM LOOP / FUNNEL -->
+<section id="gtm">
+  <div class="wrap">
+    <span class="sec-eye">06 · GTM learning loop</span>
+    <h2 class="sec-h">Diagnosing where the funnel breaks</h2>
+    <p class="sec-sub">The JD mentions GTM learning loops explicitly. Here's the framework I use to turn pipeline data into messaging and content decisions.</p>
+
+    <div class="grid-2 reveal" style="margin-top:32px;gap:20px;">
+      <div>
+        <div class="funnel-wrap">
+          <span class="f-label">Hypothetical developer ICP funnel · indicative model</span>
+          <div class="f-row">
+            <div class="f-row-top"><span class="stage">Awareness (SEO / DevRel)</span><span class="meta">broad</span></div>
+            <div class="f-track"><div class="f-fill" style="width:90%"></div></div>
+          </div>
+          <div class="f-row">
+            <div class="f-row-top"><span class="stage">Consideration (Docs / Trial)</span><span class="meta">drops sharply</span></div>
+            <div class="f-track"><div class="f-fill warm" style="width:55%"></div></div>
+          </div>
+          <div class="f-row">
+            <div class="f-row-top"><span class="stage">Evaluation (Sales-assisted)</span><span class="meta">high intent</span></div>
+            <div class="f-track"><div class="f-fill warm" style="width:34%"></div></div>
+          </div>
+          <div class="f-row">
+            <div class="f-row-top"><span class="stage">Champion expansion</span><span class="meta">key lever</span></div>
+            <div class="f-track"><div class="f-fill hot" style="width:20%"></div></div>
+          </div>
+          <div class="f-note">
+            The awareness-to-consideration drop is where developer PMM most often loses the pipeline. My hypothesis: the trial experience and documentation tell a different story than the top-funnel messaging. Aligning those is a PMM job, not just a UX job.
+          </div>
+        </div>
+      </div>
+      <div class="card" style="height:fit-content;">
+        <span class="card-tag">GTM test framework</span>
+        <h4 class="card-h" style="margin-bottom:16px;">How I'd run the learning loops mentioned in the JD</h4>
+        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;">
+          <li style="font-size:13.5px;color:var(--t2);padding:10px 12px;background:var(--bg3);border-radius:6px;border-left:2px solid var(--ld);">
+            <strong style="color:var(--t1);display:block;margin-bottom:4px;">Hypothesis-first</strong>
+            Every test starts with a falsifiable statement. "We believe developer-job-focused ad copy outperforms platform-benefit copy for ICP accounts above 500 engineers." Then we build the test to check it, not confirm it.
+          </li>
+          <li style="font-size:13.5px;color:var(--t2);padding:10px 12px;background:var(--bg3);border-radius:6px;border-left:2px solid var(--amb);">
+            <strong style="color:var(--t1);display:block;margin-bottom:4px;">Signal vs. noise rule</strong>
+            I only act on data when the pattern holds across two or more independent channels. One ad variant performing better in paid is interesting. The same message outperforming in both paid and organic is a signal.
+          </li>
+          <li style="font-size:13.5px;color:var(--t2);padding:10px 12px;background:var(--bg3);border-radius:6px;border-left:2px solid var(--grn);">
+            <strong style="color:var(--t1);display:block;margin-bottom:4px;">Weekly PMM-GTM sync</strong>
+            Not a status meeting. A 30-minute working session: what test results came in, what they mean for messaging, what we're changing next week. The output is one decision, not a recap document.
+          </li>
+          <li style="font-size:13.5px;color:var(--t2);padding:10px 12px;background:var(--bg3);border-radius:6px;border-left:2px solid var(--blu);">
+            <strong style="color:var(--t1);display:block;margin-bottom:4px;">Sales as a signal source</strong>
+            If three reps independently use the same non-approved phrasing to close a deal, that's the message the market responded to. Formal win/loss is slow. Informal deal debrief cadence is fast.
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OTHER WORK -->
+<section id="work">
+  <div class="wrap">
+    <span class="sec-eye">07 · Other relevant work</span>
+    <h2 class="sec-h">Selected projects</h2>
+    <p class="sec-sub">A cross-section of PMM and GTM work. Ranked by how directly the context maps to developer-facing and B2B SaaS product marketing.</p>
+
+    <div class="work-grid reveal">
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Canonical/" target="_blank">
+        <span class="wcard-tag">Developer GTM · Open Source</span>
+        <h4>Canonical</h4>
+        <p>GTM and PMM work for a developer-first, open source infrastructure company. Technical audience, community-led growth mechanics, enterprise expansion plays.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Shippo/" target="_blank">
+        <span class="wcard-tag">Developer API · B2B SaaS</span>
+        <h4>Shippo</h4>
+        <p>Product marketing for a developer-integrated logistics API platform. Bottom-up PLG motion, API-first positioning, and SMB-to-enterprise expansion narrative.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Stripe/" target="_blank">
+        <span class="wcard-tag">Developer-First · Enterprise SaaS</span>
+        <h4>Stripe</h4>
+        <p>Positioning and messaging work for a developer-first payments platform navigating a move into enterprise. Dual buyer: engineer champion, finance/ops economic buyer.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Veeva/" target="_blank">
+        <span class="wcard-tag">Enterprise SaaS · Complex GTM</span>
+        <h4>Veeva Systems</h4>
+        <p>Enterprise SaaS PMM work covering complex multi-stakeholder buying cycles, vertical-specific positioning, and sales enablement for a high-ACV product.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+      <a class="wcard" href="https://bhanuexcalibur.github.io/Continuous/" target="_blank">
+        <span class="wcard-tag">B2B SaaS · Positioning</span>
+        <h4>Continuous</h4>
+        <p>Core PMM: market positioning, ICP definition, competitive narrative, and content strategy for a B2B SaaS product in a crowded category.</p>
+        <div class="wcard-arr">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER SIG -->
+<section>
+  <div class="wrap">
+    <div class="sig">
+      <div class="sig-left">
+        <div class="sig-name">Bhanu <span>Excalibur</span></div>
+        <div class="sig-meta">
+          Product Marketing · GTM · B2B SaaS<br>
+          <a href="https://www.linkedin.com/in/bhanuexcalibur/" target="_blank">LinkedIn</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:bhanukumar0902@gmail.com">bhanukumar0902@gmail.com</a>
+        </div>
+        <div class="sig-btns">
+          <a href="https://drive.google.com/file/d/1GaE7gZ0QKIMzGi6Z10KH2xRcwhoPgdYJ/view" target="_blank" class="sbtn pri">View Resume</a>
+          <a href="https://www.linkedin.com/in/bhanuexcalibur/" target="_blank" class="sbtn ghost">LinkedIn</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// reading bar
+const rbar = document.getElementById('rbar');
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  const pct = (d.scrollTop / (d.scrollHeight - d.clientHeight)) * 100;
+  rbar.style.width = pct + '%';
+});
+
+// hamburger
+const hbg = document.getElementById('hbg');
+const mob = document.getElementById('mob-menu');
+hbg.addEventListener('click', () => {
+  hbg.classList.toggle('open');
+  mob.classList.toggle('open');
+});
+function closeMob(){ hbg.classList.remove('open'); mob.classList.remove('open'); }
+
+// flag toggle in hero
+const flagToggle = document.getElementById('flagToggle');
+const flagVal = document.getElementById('flagVal');
+let flagOn = true;
+flagToggle.addEventListener('click', () => {
+  flagOn = !flagOn;
+  flagToggle.classList.toggle('off', !flagOn);
+  flagVal.textContent = flagOn ? 'true' : 'false';
+  flagVal.className = 'flag-val' + (flagOn ? ' on' : '');
+});
+
+// accordion
+function toggleAccord(head) {
+  const item = head.closest('.accord-item');
+  const wasOpen = item.classList.contains('open');
+  document.querySelectorAll('.accord-item').forEach(i => i.classList.remove('open'));
+  if (!wasOpen) item.classList.add('open');
+}
+
+// scroll reveal
+const revealEls = document.querySelectorAll('.reveal');
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }});
+}, { threshold: 0.08 });
+revealEls.forEach(el => obs.observe(el));
+
+// funnel bars animate on scroll
+const fills = document.querySelectorAll('.f-fill');
+fills.forEach(f => {
+  const target = f.style.width;
+  f.style.width = '0';
+  const fObs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) { e.target.style.width = target; fObs.unobserve(e.target); }
+    });
+  }, { threshold: 0.3 });
+  fObs.observe(f);
+});
+</script>
+
+</body>
+</html>

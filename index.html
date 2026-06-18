@@ -148,36 +148,48 @@ section:last-of-type{border-bottom:none;}
 
 /* ====== HERO ====== */
 .hero{
-  min-height:88vh;display:flex;align-items:center;
-  padding:100px 0 80px;position:relative;overflow:hidden;
+  padding:0;position:relative;overflow:hidden;
+  border-bottom:1px solid var(--bdr);
 }
 
-/* big glow blob */
+.hero-inner{
+  max-width:1200px;margin:0 auto;padding:0 5vw;
+  display:grid;grid-template-columns:1fr 1.1fr;
+  gap:64px;align-items:center;
+  min-height:90vh;
+  padding-top:72px;padding-bottom:72px;
+  position:relative;z-index:1;
+}
+@media(max-width:900px){
+  .hero-inner{grid-template-columns:1fr;min-height:auto;padding-top:56px;padding-bottom:56px;gap:44px;}
+}
+
+/* ambient glow */
 .hero::before{
   content:'';position:absolute;
-  width:600px;height:600px;
-  top:-160px;right:-120px;
-  background:radial-gradient(circle, var(--ld-glo) 0%, transparent 70%);
+  width:700px;height:700px;
+  top:-200px;right:-180px;
+  background:radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 65%);
   pointer-events:none;z-index:0;
 }
 
-.hero-content{position:relative;z-index:1;max-width:760px;}
+.hero-left{position:relative;z-index:1;}
 
 .hero-tag{
   display:inline-flex;align-items:center;gap:8px;
-  font-family:'Fira Code',monospace;font-size:11px;
+  font-family:'Fira Code',monospace;font-size:10.5px;
   letter-spacing:0.10em;text-transform:uppercase;
   color:var(--ld-t);background:var(--ld-dim);
   border:1px solid rgba(99,102,241,0.22);
-  padding:6px 14px;border-radius:100px;
-  margin-bottom:32px;
+  padding:5px 13px;border-radius:100px;
+  margin-bottom:28px;
 }
-.hero-tag-dot{width:6px;height:6px;border-radius:50%;background:var(--ld);animation:flagwave 2s ease-in-out infinite;}
+.hero-tag-dot{width:5px;height:5px;border-radius:50%;background:var(--ld);animation:flagwave 2s ease-in-out infinite;}
 
 .hero-h{
-  font-size:clamp(38px,6vw,76px);font-weight:700;
-  line-height:1.04;letter-spacing:-0.02em;
-  color:var(--t1);margin-bottom:28px;
+  font-size:clamp(34px,5vw,66px);font-weight:700;
+  line-height:1.06;letter-spacing:-0.02em;
+  color:var(--t1);margin-bottom:22px;
 }
 .hero-h em{
   font-style:normal;
@@ -187,44 +199,10 @@ section:last-of-type{border-bottom:none;}
 }
 
 .hero-sub{
-  font-size:clamp(16px,1.8vw,19px);color:var(--t2);
-  line-height:1.7;max-width:580px;margin-bottom:44px;
+  font-size:clamp(15px,1.6vw,17px);color:var(--t2);
+  line-height:1.74;max-width:500px;margin-bottom:36px;
   font-weight:400;
 }
-
-/* flag toggle: the signature element */
-.flag-demo{
-  display:inline-flex;align-items:center;gap:14px;
-  background:var(--bg3);border:1px solid var(--bmd);
-  border-radius:10px;padding:14px 20px;
-  margin-bottom:44px;cursor:default;
-}
-.flag-key{
-  font-family:'Fira Code',monospace;font-size:12px;
-  color:var(--t3);letter-spacing:0.04em;
-}
-.flag-key span{color:var(--ld-t);}
-.flag-toggle{
-  width:44px;height:24px;border-radius:12px;
-  background:var(--ld);position:relative;
-  transition:background 0.25s;cursor:pointer;
-  flex-shrink:0;
-  box-shadow:0 0 12px var(--ld-glo);
-}
-.flag-toggle.off{background:var(--bg5);box-shadow:none;}
-.flag-toggle::after{
-  content:'';position:absolute;
-  width:18px;height:18px;border-radius:50%;
-  background:#fff;top:3px;left:3px;
-  transition:transform 0.25s;
-}
-.flag-toggle.off::after{transform:none;}
-.flag-toggle:not(.off)::after{transform:translateX(20px);}
-.flag-val{
-  font-family:'Fira Code',monospace;font-size:12px;
-  color:var(--t2);min-width:34px;
-}
-.flag-val.on{color:var(--grn);}
 
 .hero-btns{display:flex;gap:10px;flex-wrap:wrap;}
 .hbtn{
@@ -238,6 +216,296 @@ section:last-of-type{border-bottom:none;}
 .hbtn.pri:hover{opacity:0.87;}
 .hbtn.ghost{background:transparent;border:1px solid var(--bmd);color:var(--t2);}
 .hbtn.ghost:hover{border-color:var(--blg);color:var(--t1);}
+
+/* ====== ROLLOUT SIMULATOR (hero right) ====== */
+.rollout-sim{
+  background:var(--bg2);border:1px solid var(--bmd);
+  border-radius:14px;
+  position:relative;
+  /* NO overflow:hidden here: removing it fixed the tick label clipping */
+}
+
+/* context strip: tells a first-timer what this is */
+.sim-context{
+  padding:14px 18px 12px;
+  border-bottom:1px solid var(--bdr);
+  background:var(--ld-dim);
+  border-radius:13px 13px 0 0;
+}
+.sim-context-title{
+  font-size:13px;font-weight:600;color:var(--t1);
+  margin-bottom:3px;
+}
+.sim-context-sub{
+  font-size:12px;color:var(--ld-t);line-height:1.5;
+  font-family:'Fira Code',monospace;letter-spacing:0.01em;
+}
+
+/* sim top bar */
+.sim-topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:11px 18px;border-bottom:1px solid var(--bdr);
+  background:var(--bg3);
+  gap:12px;
+}
+.sim-dots{display:flex;gap:6px;flex-shrink:0;}
+.sim-dot{width:10px;height:10px;border-radius:50%;}
+.sim-dot.r{background:#f87171;opacity:0.6;}
+.sim-dot.y{background:#fbbf24;opacity:0.6;}
+.sim-dot.g{background:#34d399;opacity:0.6;}
+.sim-filename{
+  font-family:'Fira Code',monospace;font-size:10px;
+  color:var(--t3);letter-spacing:0.04em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  flex:1;text-align:center;
+}
+.sim-status{
+  font-family:'Fira Code',monospace;font-size:10px;font-weight:600;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--grn);background:var(--gdim);
+  border:1px solid rgba(52,211,153,0.25);
+  padding:3px 10px;border-radius:4px;
+  transition:color 0.3s,background 0.3s,border-color 0.3s;
+  flex-shrink:0;
+}
+.sim-status.warn{color:var(--amb);background:var(--adim);border-color:rgba(245,158,11,0.25);}
+.sim-status.crit{color:var(--red);background:var(--rdim);border-color:rgba(248,113,113,0.25);}
+
+/* flag name + pct row */
+.sim-flag-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 18px;border-bottom:1px solid var(--bdr);
+  gap:12px;
+}
+.sim-flag-info{display:flex;flex-direction:column;gap:2px;}
+.sim-flag-name{
+  font-family:'Fira Code',monospace;font-size:12px;
+  color:var(--ld-t);
+}
+.sim-flag-desc{
+  font-size:11px;color:var(--t3);
+}
+.sim-pct-badge{
+  font-family:'Fira Code',monospace;font-size:18px;font-weight:700;
+  color:var(--t1);
+  min-width:52px;text-align:right;
+  transition:color 0.25s;
+  flex-shrink:0;
+}
+.sim-pct-badge.warn{color:var(--at);}
+.sim-pct-badge.crit{color:var(--red);}
+
+/* slider section */
+.sim-slider-wrap{
+  padding:16px 18px 20px;  /* extra bottom padding for ticks */
+  border-bottom:1px solid var(--bdr);
+  background:var(--bg2);
+}
+.sim-slider-header{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:14px;
+}
+.sim-slider-left{
+  font-size:12px;color:var(--t2);font-weight:500;
+}
+.sim-slider-right{
+  font-family:'Fira Code',monospace;font-size:11px;
+  color:var(--t3);
+}
+.sim-slider-right.warn{color:var(--at);}
+.sim-slider-right.crit{color:var(--red);}
+
+/* the actual track + thumb */
+.slider-track{
+  position:relative;
+  height:24px;  /* just thumb height, ticks sit below outside this */
+  display:flex;align-items:center;
+  cursor:grab;user-select:none;-webkit-user-select:none;
+  touch-action:none;
+}
+.slider-track:active{cursor:grabbing;}
+
+.slider-bg{
+  position:absolute;left:0;right:0;height:5px;
+  background:var(--bg5);border-radius:3px;
+  overflow:hidden;
+}
+.slider-fill{
+  height:100%;border-radius:3px;
+  background:linear-gradient(90deg,var(--ld),var(--ld-t));
+  width:0%;
+}
+.slider-fill.warn{background:linear-gradient(90deg,var(--amb),var(--at));}
+.slider-fill.crit{background:linear-gradient(90deg,var(--red),#fca5a5);}
+
+.slider-thumb{
+  position:absolute;
+  width:22px;height:22px;border-radius:50%;
+  background:var(--t1);
+  border:2.5px solid var(--ld);
+  box-shadow:0 0 0 4px var(--ld-dim),0 2px 10px rgba(0,0,0,0.4);
+  transform:translateX(-50%);
+  left:0%;
+  transition:border-color 0.25s,box-shadow 0.25s;
+  will-change:left;
+  z-index:2;
+}
+.slider-thumb.warn{border-color:var(--amb);box-shadow:0 0 0 4px var(--adim),0 2px 10px rgba(0,0,0,0.4);}
+.slider-thumb.crit{border-color:var(--red);box-shadow:0 0 0 4px var(--rdim),0 2px 10px rgba(0,0,0,0.4);}
+
+/* nudge animation: rocks the thumb left-right on load */
+@keyframes thumbNudge{
+  0%   { left:0%; }
+  20%  { left:18%; }
+  35%  { left:8%; }
+  50%  { left:22%; }
+  65%  { left:5%; }
+  80%  { left:14%; }
+  100% { left:0%; }
+}
+.slider-thumb.nudging{
+  animation: thumbNudge 1.8s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+/* matching fill nudge */
+@keyframes fillNudge{
+  0%   { width:0%; }
+  20%  { width:18%; }
+  35%  { width:8%; }
+  50%  { width:22%; }
+  65%  { width:5%; }
+  80%  { width:14%; }
+  100% { width:0%; }
+}
+.slider-fill.nudging{
+  animation: fillNudge 1.8s cubic-bezier(0.4,0,0.2,1) forwards;
+}
+
+/* ticks sit OUTSIDE slider-track, below it */
+.slider-ticks{
+  display:flex;justify-content:space-between;
+  margin-top:8px;
+  padding:0 2px;
+}
+.tick{
+  font-family:'Fira Code',monospace;font-size:9px;
+  color:var(--t3);letter-spacing:0.04em;
+}
+
+/* drag hint row: very prominent */
+.sim-drag-hint{
+  display:flex;align-items:center;gap:8px;
+  margin-top:10px;
+  padding:8px 10px;
+  background:rgba(99,102,241,0.07);
+  border:1px solid rgba(99,102,241,0.15);
+  border-radius:6px;
+}
+.drag-arrow{
+  font-size:16px;color:var(--ld-t);
+  animation:arrowBounce 1.2s ease-in-out infinite;
+}
+@keyframes arrowBounce{
+  0%,100%{ transform:translateX(0); }
+  50%{ transform:translateX(5px); }
+}
+.drag-text{
+  font-size:12px;color:var(--t2);line-height:1.4;
+}
+.drag-text strong{color:var(--t1);font-weight:600;}
+
+/* metrics row */
+.sim-metrics{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  border-bottom:1px solid var(--bdr);
+}
+.sim-metric{
+  padding:14px 16px;border-right:1px solid var(--bdr);
+}
+.sim-metric:last-child{border-right:none;}
+.sm-label{
+  font-family:'Fira Code',monospace;font-size:9px;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--t3);margin-bottom:6px;
+}
+.sm-val{
+  font-size:18px;font-weight:700;color:var(--t1);
+  line-height:1;letter-spacing:-0.01em;
+  transition:color 0.3s;
+}
+.sm-val.ok{color:var(--grn);}
+.sm-val.warn{color:var(--amb);}
+.sm-val.crit{color:var(--red);}
+.sm-delta{
+  font-family:'Fira Code',monospace;font-size:10px;
+  color:var(--t3);margin-top:4px;
+  transition:color 0.3s;
+  min-height:14px;
+}
+.sm-delta.up{color:var(--red);}
+.sm-delta.dn{color:var(--grn);}
+
+/* sparkline chart */
+.sim-chart-wrap{
+  padding:14px 18px 14px;border-bottom:1px solid var(--bdr);
+}
+.sim-chart-header{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:10px;
+}
+.sim-chart-label{
+  font-family:'Fira Code',monospace;font-size:9px;
+  letter-spacing:0.08em;text-transform:uppercase;
+  color:var(--t3);
+}
+.sim-chart-note{
+  font-size:11px;color:var(--t3);
+  transition:color 0.3s;
+}
+.sim-chart-note.warn{color:var(--at);}
+.sim-chart-note.crit{color:var(--red);}
+.sim-chart{
+  width:100%;height:56px;
+  position:relative;
+}
+.sim-chart svg{
+  position:absolute;inset:0;
+  width:100%;height:100%;display:block;
+  overflow:visible;
+}
+
+/* rollback button */
+.sim-action{
+  padding:14px 18px;
+  min-height:54px; /* reserves space so layout doesn't jump */
+  display:flex;align-items:center;
+}
+.rollback-btn{
+  width:100%;padding:10px 18px;
+  background:var(--rdim);border:1px solid rgba(248,113,113,0.25);
+  color:var(--red);border-radius:7px;
+  font-size:13px;font-weight:600;
+  letter-spacing:0.01em;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:opacity 0.2s,background 0.2s,border-color 0.2s,color 0.2s;
+  opacity:0;pointer-events:none;
+  font-family:'Space Grotesk',sans-serif;
+}
+.rollback-btn.visible{opacity:1;pointer-events:auto;}
+.rollback-btn:hover{background:rgba(248,113,113,0.22);border-color:rgba(248,113,113,0.45);}
+.rollback-btn.success{
+  background:var(--gdim);border-color:rgba(52,211,153,0.3);
+  color:var(--grn);
+}
+.rollback-btn .rb-icon{font-size:15px;}
+
+/* what-happens caption under rollback */
+.sim-caption{
+  padding:0 18px 14px;
+  font-size:11px;color:var(--t3);line-height:1.5;
+  display:none;
+}
+.sim-caption.show{display:block;}
+.sim-caption strong{color:var(--at);}
 
 /* ====== CARDS / GRID ====== */
 .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
@@ -594,8 +862,10 @@ section:last-of-type{border-bottom:none;}
 
 <!-- HERO -->
 <section class="hero">
-  <div class="wrap">
-    <div class="hero-content">
+  <div class="hero-inner">
+
+    <!-- LEFT: copy -->
+    <div class="hero-left">
       <div class="hero-tag">
         <span class="hero-tag-dot"></span>
         Product Marketing · Feature Management · Developer GTM
@@ -609,19 +879,125 @@ section:last-of-type{border-bottom:none;}
         LaunchDarkly decoupled deployment from delivery. This page shows how PMM can close the loop between that engineering-level insight and the buyers who need to believe it.
       </p>
 
-      <!-- interactive flag toggle signature -->
-      <div class="flag-demo" id="flagDemo">
-        <span class="flag-key"><span>new-checkout-flow</span></span>
-        <div class="flag-toggle" id="flagToggle"></div>
-        <span class="flag-val on" id="flagVal">true</span>
-      </div>
-
       <div class="hero-btns">
         <a href="#positioning" class="hbtn pri">See the work ↓</a>
         <a href="https://www.linkedin.com/in/bhanuexcalibur/" target="_blank" class="hbtn ghost">LinkedIn</a>
       </div>
     </div>
-  </div>
+
+    <!-- RIGHT: rollout simulator -->
+    <div class="rollout-sim" id="rolloutSim">
+
+      <!-- what this is: for anyone seeing it fresh -->
+      <div class="sim-context">
+        <div class="sim-context-title">Guarded Release Simulator</div>
+        <div class="sim-context-sub">Push a feature to more users. Watch what breaks. Roll back in one click.</div>
+      </div>
+
+      <!-- window chrome -->
+      <div class="sim-topbar">
+        <div class="sim-dots">
+          <div class="sim-dot r"></div>
+          <div class="sim-dot y"></div>
+          <div class="sim-dot g"></div>
+        </div>
+        <span class="sim-filename">new-checkout-v2 · feature flag</span>
+        <span class="sim-status" id="simStatus">HEALTHY</span>
+      </div>
+
+      <!-- flag name + live pct -->
+      <div class="sim-flag-row">
+        <div class="sim-flag-info">
+          <span class="sim-flag-name">new-checkout-v2</span>
+          <span class="sim-flag-desc">Rolling out to production users</span>
+        </div>
+        <span class="sim-pct-badge" id="pctBadge">0%</span>
+      </div>
+
+      <!-- slider -->
+      <div class="sim-slider-wrap">
+        <div class="sim-slider-header">
+          <span class="sim-slider-left">Users receiving new checkout</span>
+          <span class="sim-slider-right" id="affectedUsers">0 of 42,380 users</span>
+        </div>
+
+        <div class="slider-track" id="sliderTrack" role="slider"
+             aria-label="Rollout percentage" aria-valuemin="0" aria-valuemax="100"
+             aria-valuenow="0" tabindex="0">
+          <div class="slider-bg">
+            <div class="slider-fill" id="sliderFill"></div>
+          </div>
+          <div class="slider-thumb" id="sliderThumb"></div>
+        </div>
+
+        <div class="slider-ticks">
+          <span class="tick">0%</span>
+          <span class="tick">25%</span>
+          <span class="tick">50%</span>
+          <span class="tick">75%</span>
+          <span class="tick">100%</span>
+        </div>
+
+        <!-- drag affordance hint with bouncing arrow -->
+        <div class="sim-drag-hint" id="dragHint">
+          <span class="drag-arrow">→</span>
+          <span class="drag-text"><strong>Drag right</strong> to increase rollout, metrics update live</span>
+        </div>
+      </div>
+
+      <!-- live metrics: 3 columns -->
+      <div class="sim-metrics">
+        <div class="sim-metric">
+          <div class="sm-label">Error rate</div>
+          <div class="sm-val ok" id="metricErr">0.1%</div>
+          <div class="sm-delta dn" id="metricErrD">stable</div>
+        </div>
+        <div class="sim-metric">
+          <div class="sm-label">p95 latency</div>
+          <div class="sm-val ok" id="metricLat">142ms</div>
+          <div class="sm-delta dn" id="metricLatD">stable</div>
+        </div>
+        <div class="sim-metric">
+          <div class="sm-label">Conversion</div>
+          <div class="sm-val ok" id="metricConv">3.8%</div>
+          <div class="sm-delta dn" id="metricConvD">+0.0%</div>
+        </div>
+      </div>
+
+      <!-- sparkline -->
+      <div class="sim-chart-wrap">
+        <div class="sim-chart-header">
+          <span class="sim-chart-label">Error rate over time</span>
+          <span class="sim-chart-note" id="chartNote">within normal range</span>
+        </div>
+        <div class="sim-chart">
+          <svg id="sparkSvg" viewBox="0 0 300 56" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="sparkGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="var(--ld)" stop-opacity="0.18" id="gradTop"/>
+                <stop offset="100%" stop-color="var(--ld)" stop-opacity="0" id="gradBot"/>
+              </linearGradient>
+            </defs>
+            <polygon id="sparkArea" points="" fill="url(#sparkGrad)"/>
+            <polyline id="sparkLine" points="" fill="none" stroke="var(--ld)" stroke-width="1.8"
+                      stroke-linejoin="round" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- rollback -->
+      <div class="sim-action">
+        <button class="rollback-btn" id="rollbackBtn" onclick="triggerRollback()">
+          <span class="rb-icon">↩</span>
+          Metrics degrading: click to roll back to 0%
+        </button>
+      </div>
+      <div class="sim-caption" id="simCaption">
+        <strong>What just happened:</strong> LaunchDarkly detected the regression and rolled the flag back to 0% instantly, with no redeployment needed.
+      </div>
+
+    </div><!-- /rollout-sim -->
+  </div><!-- /hero-inner -->
 </section>
 
 <!-- POSITIONING SECTION -->
@@ -1051,16 +1427,260 @@ hbg.addEventListener('click', () => {
 });
 function closeMob(){ hbg.classList.remove('open'); mob.classList.remove('open'); }
 
-// flag toggle in hero
-const flagToggle = document.getElementById('flagToggle');
-const flagVal = document.getElementById('flagVal');
-let flagOn = true;
-flagToggle.addEventListener('click', () => {
-  flagOn = !flagOn;
-  flagToggle.classList.toggle('off', !flagOn);
-  flagVal.textContent = flagOn ? 'true' : 'false';
-  flagVal.className = 'flag-val' + (flagOn ? ' on' : '');
-});
+// ============================================================
+// ROLLOUT SIMULATOR: product-native hero interaction
+// Drag slider right -> rollout pct rises -> metrics degrade
+// past 75% -> rollback button appears -> click to snap back
+// One RAF write per frame. will-change only on slider-thumb.
+// ============================================================
+(function(){
+  const track       = document.getElementById('sliderTrack');
+  const thumb       = document.getElementById('sliderThumb');
+  const fill        = document.getElementById('sliderFill');
+  const pctBadge    = document.getElementById('pctBadge');
+  const affUsers    = document.getElementById('affectedUsers');
+  const simStatus   = document.getElementById('simStatus');
+  const metricErr   = document.getElementById('metricErr');
+  const metricErrD  = document.getElementById('metricErrD');
+  const metricLat   = document.getElementById('metricLat');
+  const metricLatD  = document.getElementById('metricLatD');
+  const metricConv  = document.getElementById('metricConv');
+  const metricConvD = document.getElementById('metricConvD');
+  const rollbackBtn = document.getElementById('rollbackBtn');
+  const simCaption  = document.getElementById('simCaption');
+  const sparkLine   = document.getElementById('sparkLine');
+  const sparkArea   = document.getElementById('sparkArea');
+  const gradTop     = document.getElementById('gradTop');
+  const gradBot     = document.getElementById('gradBot');
+  const chartNote   = document.getElementById('chartNote');
+  const dragHint    = document.getElementById('dragHint');
+
+  let pct = 0;
+  let dragging = false;
+  let rafPending = false;
+  let hasInteracted = false;
+  const TOTAL_USERS = 42380;
+
+  // error rate history for sparkline (28 baseline points)
+  const errHistory = [];
+  for (let i = 0; i < 28; i++) errHistory.push(0.1);
+
+  // ---- compute metrics from rollout pct ----
+  function computeMetrics(p) {
+    if (p < 55) {
+      return {
+        err:  0.1 + (p / 100) * 0.32,
+        lat:  142 + (p / 100) * 22,
+        conv: 3.8 + (p / 100) * 0.38
+      };
+    }
+    if (p < 76) {
+      const s = (p - 55) / 21;
+      return {
+        err:  0.46 + s * 3.8,
+        lat:  155 + s * 210,
+        conv: 4.0  - s * 1.1
+      };
+    }
+    const s = (p - 76) / 24;
+    return {
+      err:  4.26 + s * 9.5,
+      lat:  365  + s * 460,
+      conv: 2.9  - s * 1.3
+    };
+  }
+
+  function tier(p) {
+    if (p < 55) return 'ok';
+    if (p < 76) return 'warn';
+    return 'crit';
+  }
+
+  // ---- sparkline ----
+  function drawSparkline(t) {
+    const W = 300, H = 56;
+    const vals = errHistory;
+    const dataMax = Math.max.apply(null, vals);
+    const maxY = Math.max(14, dataMax * 1.15);
+    const range = maxY; // minY is 0
+
+    const pts = vals.map(function(v, i) {
+      var x = (i / (vals.length - 1)) * W;
+      var y = H - 4 - ((v / range) * (H - 10));
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    });
+
+    const lineColor = t === 'crit' ? 'var(--red)' : t === 'warn' ? 'var(--amb)' : 'var(--ld)';
+    sparkLine.setAttribute('points', pts.join(' '));
+    sparkLine.setAttribute('stroke', lineColor);
+
+    const lastPt = pts[pts.length - 1];
+    const lastX  = parseFloat(lastPt.split(',')[0]);
+    sparkArea.setAttribute('points', pts.join(' ') + ' ' + lastX + ',' + H + ' 0,' + H);
+
+    gradTop.setAttribute('stop-color', lineColor);
+    gradBot.setAttribute('stop-color', lineColor);
+  }
+
+  // ---- one DOM write per RAF ----
+  function applyFrame() {
+    rafPending = false;
+    var p = pct;
+    var t = tier(p);
+    var m = computeMetrics(p);
+    var users = Math.round((p / 100) * TOTAL_USERS);
+    var cls = t === 'ok' ? '' : t;
+
+    // slider position
+    thumb.style.left = p.toFixed(1) + '%';
+    fill.style.width  = p.toFixed(1) + '%';
+    track.setAttribute('aria-valuenow', Math.round(p));
+
+    // color classes
+    thumb.className      = 'slider-thumb'   + (cls ? ' ' + cls : '');
+    fill.className       = 'slider-fill'    + (cls ? ' ' + cls : '');
+    pctBadge.className   = 'sim-pct-badge'  + (cls ? ' ' + cls : '');
+    simStatus.className  = 'sim-status'     + (cls ? ' ' + cls : '');
+    chartNote.className  = 'sim-chart-note' + (cls ? ' ' + cls : '');
+    affUsers.className   = 'sim-slider-right' + (cls ? ' ' + cls : '');
+
+    // text values
+    pctBadge.textContent  = Math.round(p) + '%';
+    affUsers.textContent  = users.toLocaleString() + ' of 42,380 users';
+    simStatus.textContent = t === 'crit' ? 'DEGRADED' : t === 'warn' ? 'WARNING' : 'HEALTHY';
+
+    // error rate
+    metricErr.className   = 'sm-val ' + (t === 'ok' ? 'ok' : t);
+    metricErr.textContent = m.err.toFixed(1) + '%';
+    if (p === 0) {
+      metricErrD.className = 'sm-delta dn'; metricErrD.textContent = 'stable';
+    } else if (t === 'crit') {
+      metricErrD.className = 'sm-delta up'; metricErrD.textContent = 'critical';
+    } else if (t === 'warn') {
+      metricErrD.className = 'sm-delta up'; metricErrD.textContent = 'rising';
+    } else {
+      metricErrD.className = 'sm-delta dn';
+      metricErrD.textContent = '+' + (m.err - 0.1).toFixed(2) + '%';
+    }
+
+    // latency
+    metricLat.className    = 'sm-val ' + (t === 'ok' ? 'ok' : t);
+    metricLat.textContent  = Math.round(m.lat) + 'ms';
+    metricLatD.className   = 'sm-delta ' + (t !== 'ok' ? 'up' : 'dn');
+    metricLatD.textContent = t !== 'ok' ? 'degrading' : 'stable';
+
+    // conversion
+    var convDiff = m.conv - 3.8;
+    metricConv.className   = 'sm-val ' + (t === 'ok' ? 'ok' : t);
+    metricConv.textContent = Math.max(0, m.conv).toFixed(1) + '%';
+    metricConvD.className  = 'sm-delta ' + (convDiff < -0.05 ? 'up' : 'dn');
+    metricConvD.textContent = (convDiff >= 0 ? '+' : '') + convDiff.toFixed(1) + '%';
+
+    // chart note
+    chartNote.textContent = t === 'crit' ? 'regression detected'
+                          : t === 'warn' ? 'elevated, watch closely'
+                          : 'within normal range';
+
+    // sparkline history
+    errHistory.push(m.err);
+    errHistory.shift();
+    drawSparkline(t);
+
+    // rollback button
+    if (p >= 76) {
+      rollbackBtn.classList.add('visible');
+    } else {
+      rollbackBtn.classList.remove('visible');
+      simCaption.classList.remove('show');
+    }
+
+    // hide drag hint once user interacts
+    if (hasInteracted && dragHint) {
+      dragHint.style.opacity = '0';
+      dragHint.style.pointerEvents = 'none';
+    }
+  }
+
+  function scheduleFrame() {
+    if (!rafPending) { rafPending = true; requestAnimationFrame(applyFrame); }
+  }
+
+  // ---- drag / touch ----
+  function pctFromEvent(e) {
+    var rect = track.getBoundingClientRect();
+    var clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    return Math.max(0, Math.min(100, (clientX - rect.left) / rect.width * 100));
+  }
+
+  track.addEventListener('mousedown', function(e) {
+    dragging = true; hasInteracted = true;
+    pct = pctFromEvent(e); scheduleFrame(); e.preventDefault();
+  });
+  window.addEventListener('mousemove', function(e) {
+    if (!dragging) return; pct = pctFromEvent(e); scheduleFrame();
+  });
+  window.addEventListener('mouseup', function() { dragging = false; });
+
+  track.addEventListener('touchstart', function(e) {
+    dragging = true; hasInteracted = true; pct = pctFromEvent(e); scheduleFrame();
+  }, { passive: true });
+  window.addEventListener('touchmove', function(e) {
+    if (!dragging) return; pct = pctFromEvent(e); scheduleFrame();
+  }, { passive: true });
+  window.addEventListener('touchend', function() { dragging = false; });
+
+  track.addEventListener('keydown', function(e) {
+    hasInteracted = true;
+    if (e.key === 'ArrowRight') { pct = Math.min(100, pct + 5); scheduleFrame(); }
+    if (e.key === 'ArrowLeft')  { pct = Math.max(0,   pct - 5); scheduleFrame(); }
+  });
+
+  // ---- rollback ----
+  window.triggerRollback = function() {
+    rollbackBtn.textContent = '✓ Rolled back: flag at 0%, no redeploy needed';
+    rollbackBtn.classList.add('success');
+    errHistory.fill(0.1);
+    var startPct = pct;
+    var startTime = performance.now();
+    var dur = 700;
+    function animDown(now) {
+      var prog = Math.min(1, (now - startTime) / dur);
+      var ease = 1 - Math.pow(1 - prog, 3);
+      pct = startPct * (1 - ease);
+      scheduleFrame();
+      if (prog < 1) {
+        requestAnimationFrame(animDown);
+      } else {
+        pct = 0; scheduleFrame();
+        simCaption.classList.add('show');
+        setTimeout(function() {
+          rollbackBtn.classList.remove('visible', 'success');
+          rollbackBtn.innerHTML = '<span class="rb-icon">&#x21A9;</span>Metrics degrading \u2014 click to roll back to 0%';
+          if (dragHint) { dragHint.style.opacity = '1'; dragHint.style.pointerEvents = 'auto'; }
+        }, 2800);
+      }
+    }
+    requestAnimationFrame(animDown);
+  };
+
+  // ---- nudge animation: rocks thumb right then back on page load ----
+  // Pure CSS keyframe (thumbNudge / fillNudge defined in CSS)
+  // Fires once after 900ms to signal "this is draggable"
+  setTimeout(function() {
+    if (hasInteracted) return; // skip if user already touched it
+    thumb.classList.add('nudging');
+    fill.classList.add('nudging');
+    thumb.addEventListener('animationend', function() {
+      thumb.classList.remove('nudging');
+      fill.classList.remove('nudging');
+    }, { once: true });
+  }, 900);
+
+  // initial render
+  drawSparkline('ok');
+  scheduleFrame();
+
+})();
 
 // accordion
 function toggleAccord(head) {
